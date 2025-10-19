@@ -33,4 +33,5 @@ EXPOSE 8000
 ENV PYTHONUNBUFFERED=1
 
 # Run the Reflex app in production mode
-CMD reflex run --env prod --loglevel info --backend-host 0.0.0.0 --backend-port $PORT
+# Use shell form to allow environment variable expansion
+CMD reflex run --env prod --loglevel info --backend-host 0.0.0.0 --backend-port ${PORT:-8000}
