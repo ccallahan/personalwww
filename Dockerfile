@@ -22,6 +22,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the entire project
 COPY . .
 
+# Make start script executable
+RUN chmod +x start.sh
+
 # Initialize Reflex and export for production
 RUN reflex init
 RUN reflex export --frontend-only --no-zip
@@ -32,6 +35,5 @@ EXPOSE 8000
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 
-# Run the Reflex app in production mode
-# Use shell form to allow environment variable expansion
-CMD reflex run --env prod --loglevel info --backend-host 0.0.0.0 --backend-port ${PORT:-8000}
+# Run the start script
+CMD ["./start.sh"]
