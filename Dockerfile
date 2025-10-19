@@ -27,6 +27,8 @@ RUN chmod +x start.sh
 
 # Initialize Reflex and export for production
 RUN reflex init
+
+# Build the frontend for production (creates optimized build)
 RUN reflex export --frontend-only --no-zip
 
 # Expose port (Railway will use $PORT)
