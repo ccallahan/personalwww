@@ -3,7 +3,28 @@
 import reflex as rx
 import httpx
 from bs4 import BeautifulSoup
+from datetime import datetime
 from .starmap import starmap
+
+
+def degrees_to_cardinal(degrees: float) -> str:
+    """Convert wind direction in degrees to cardinal direction."""
+    directions = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
+                  "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
+    index = round(degrees / 22.5) % 16
+    return directions[index]
+
+
+def format_date(date_str: str) -> str:
+    """Convert date from DD/MM/YY to MM/DD/YY format."""
+    try:
+        # Parse the date in DD/MM/YY format
+        date_obj = datetime.strptime(date_str, "%d/%m/%y")
+        # Return in MM/DD/YY format
+        return date_obj.strftime("%m/%d/%y")
+    except Exception:
+        # If parsing fails, return original
+        return date_str
 
 
 class State(rx.State):
@@ -68,7 +89,8 @@ class State(rx.State):
                     for row in rows:
                         cells = row.find_all("td")
                         if len(cells) >= 7:  # Valid contact row
-                            self.last_contact_date = cells[0].text.strip()
+                            raw_date = cells[0].text.strip()
+                            self.last_contact_date = format_date(raw_date)
                             self.last_contact_country = (
                                 cells[1].text.strip()
                             )
@@ -138,7 +160,8 @@ class State(rx.State):
                             wind_dir = props.get("windDirection", {}).get("value")
                             if wind_speed and wind_dir:
                                 wind_mph = wind_speed * 0.621371  # km/h to mph
-                                self.weather_wind = f"{wind_dir:.0f}° at {wind_mph:.0f} mph"
+                                cardinal = degrees_to_cardinal(wind_dir)
+                                self.weather_wind = f"{cardinal} at {wind_mph:.0f} mph"
                     
                     # Check for active alerts
                     alerts_response = await client.get(
@@ -318,12 +341,30 @@ def index() -> rx.Component:
             position="relative",
             z_index="1",
         ),
-        width="100%",
+        width="100vw",
         height="100vh",
-        overflow="hidden",
+        position="fixed",
+        top="0",
+        left="0",
+        overflow_y="auto",
+        overflow_x="hidden",
         on_mount=State.fetch_all_data,
     )
 
 
-app = rx.App()
+app = rx.App(
+    stylesheets=[],
+    style={
+        "body": {
+            "margin": "0",
+            "padding": "0",
+            "overflow": "hidden",
+        },
+        "#root": {
+            "width": "100vw",
+            "height": "100vh",
+            "overflow": "hidden",
+        }
+    }
+)
 app.add_page(index, title="Chance Callahan")

@@ -103,15 +103,24 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
         // Create a specific div for the map
         const mapDiv = document.createElement('div');
         mapDiv.id = 'celestial-map';
-        mapDiv.style.width = '100%';
-        mapDiv.style.height = '100%';
+        mapDiv.style.width = '100vw';
+        mapDiv.style.height = '100vh';
+        mapDiv.style.position = 'absolute';
+        mapDiv.style.top = '0';
+        mapDiv.style.left = '0';
+        mapDiv.style.display = 'flex';
+        mapDiv.style.alignItems = 'center';
+        mapDiv.style.justifyContent = 'center';
         containerRef.current.appendChild(mapDiv);
 
+        // Calculate size to fill screen
+        const size = Math.max(window.innerWidth, window.innerHeight);
+
         const config = {
-          width: 0, // 0 = full width
+          width: size, // Use larger dimension to ensure full coverage
           projection: 'stereographic',
           transform: 'equatorial',
-          center: null,
+          center: [0, 0],
           orientationfixed: false,
           geopos: [longitude, latitude],
           follow: 'zenith',
@@ -166,6 +175,23 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
         window.Celestial.display(config);
         mapRef.current = window.Celestial;
 
+        // Handle window resize
+        const handleResize = () => {
+          if (mapRef.current && mapRef.current.resize) {
+            const size = Math.max(window.innerWidth, window.innerHeight);
+            mapRef.current.resize({ width: size });
+          }
+        };
+        
+        window.addEventListener('resize', handleResize);
+        
+        // Initial resize to ensure proper sizing
+        setTimeout(handleResize, 100);
+
+        return () => {
+          window.removeEventListener('resize', handleResize);
+        };
+
       } catch (error) {
         console.error('Failed to load d3-celestial:', error);
       }
@@ -196,9 +222,14 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
         left: 0,
         right: 0,
         bottom: 0,
+        margin: 0,
+        padding: 0,
         zIndex: -1,
         overflow: 'hidden',
         background: 'linear-gradient(to bottom, #000428, #004e92)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     />
   );
