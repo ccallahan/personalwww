@@ -1,12 +1,21 @@
 #!/bin/bash
-# Start script for Reflex app on Railway
+# Start script for Reflex app on Railway with Caddy reverse proxy
 
 # Use Railway's PORT or default to 8000
 PORT=${PORT:-8000}
 
-# Set production URLs - these MUST be set before running
-export API_URL=${API_URL:-https://www.chancecallahan.com}
-export DEPLOY_URL=${DEPLOY_URL:-https://www.chancecallahan.com}
+# Reflex will run on port 3000 internally
+REFLEX_PORT=3000
 
-# Run Reflex in production mode
-exec reflex run --env prod --loglevel debug --backend-host 0.0.0.0 --backend-port "$PORT"
+# Set production URLs
+export API_URL=https://www.chancecallahan.com
+export DEPLOY_URL=https://www.chancecallahan.com
+
+# Start Reflex in the background
+reflex run --env prod --loglevel debug --backend-host 127.0.0.1 --backend-port "$REFLEX_PORT" &
+
+# Wait a moment for Reflex to start
+sleep 5
+
+# Start Caddy in the foreground (this keeps the container running)
+exec caddy run --config /app/Caddyfile --adapter caddyfile

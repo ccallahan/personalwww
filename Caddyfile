@@ -1,0 +1,13 @@
+:{$PORT} {
+    # Enable automatic HTTPS
+    encode gzip
+
+    # Reverse proxy to Reflex backend
+    reverse_proxy localhost:3000 {
+        # WebSocket support
+        header_up Host {host}
+        header_up X-Real-IP {remote}
+        header_up X-Forwarded-For {remote}
+        header_up X-Forwarded-Proto {scheme}
+    }
+}
