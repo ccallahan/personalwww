@@ -25,6 +25,10 @@ COPY . .
 # Make start script executable
 RUN chmod +x start.sh
 
+# Set production environment variables for build
+ENV API_URL=https://www.chancecallahan.com
+ENV DEPLOY_URL=https://www.chancecallahan.com
+
 # Initialize Reflex and export for production
 RUN reflex init
 
