@@ -31,7 +31,11 @@ COPY . .
 # Make start script executable
 RUN chmod +x start.sh
 
-# Initialize Reflex
+# Set build-time environment variables for Reflex
+ENV API_URL=https://www.chancecallahan.com
+ENV DEPLOY_URL=https://www.chancecallahan.com
+
+# Initialize Reflex (this will use the env vars above)
 RUN reflex init
 
 # Expose port (Railway will use $PORT)
