@@ -1,0 +1,5 @@
+
+reflex==0.8.15
+httpx
+beautifulsoup4
+lxml
