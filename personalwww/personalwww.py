@@ -239,8 +239,7 @@ def index() -> rx.Component:
                                 color="white",
                             ),
                             rx.text(
-                                f"Contacted {State.last_contact_callsign} "
-                                f"in {State.last_contact_country}",
+                                f"Contacted {State.last_contact_callsign}",
                                 color="white",
                                 size="4",
                             ),

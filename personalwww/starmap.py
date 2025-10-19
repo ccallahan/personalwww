@@ -106,8 +106,9 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
         mapDiv.style.width = '100vw';
         mapDiv.style.height = '100vh';
         mapDiv.style.position = 'absolute';
-        mapDiv.style.top = '0';
-        mapDiv.style.left = '0';
+        mapDiv.style.top = '50%';
+        mapDiv.style.left = '50%';
+        mapDiv.style.transform = 'translate(-50%, -50%) scale(1.2)';
         mapDiv.style.display = 'flex';
         mapDiv.style.alignItems = 'center';
         mapDiv.style.justifyContent = 'center';
