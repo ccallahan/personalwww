@@ -25,15 +25,8 @@ COPY . .
 # Make start script executable
 RUN chmod +x start.sh
 
-# Set production environment variables for build
-ENV API_URL=https://www.chancecallahan.com
-ENV DEPLOY_URL=https://www.chancecallahan.com
-
-# Initialize Reflex and export for production
+# Initialize Reflex
 RUN reflex init
-
-# Build the frontend for production (creates optimized build)
-RUN reflex export --frontend-only --no-zip
 
 # Expose port (Railway will use $PORT)
 EXPOSE 8000
