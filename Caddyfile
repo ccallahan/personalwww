@@ -2,8 +2,8 @@
     # Enable automatic HTTPS
     encode gzip
 
-    # Reverse proxy to Reflex backend
-    reverse_proxy localhost:3000 {
+    # Reverse proxy to Reflex backend on port 8080
+    reverse_proxy localhost:8080 {
         # WebSocket support
         header_up Host {host}
         header_up X-Real-IP {remote}
