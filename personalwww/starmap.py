@@ -59,6 +59,7 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
 
   useEffect(() => {
     let mounted = true;
+    let resizeHandler = null;
 
     const initMap = async () => {
       try {
@@ -97,8 +98,19 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
 
         console.log('Initializing Celestial map...');
 
-        // Clear any previous instance
-        containerRef.current.innerHTML = '';
+        // Properly clear any previous instance
+        if (mapRef.current && mapRef.current.clear) {
+          try {
+            mapRef.current.clear();
+          } catch (e) {
+            console.log('Error clearing previous map:', e);
+          }
+        }
+        
+        // Clear container
+        if (containerRef.current) {
+          containerRef.current.innerHTML = '';
+        }
         
         // Create a specific div for the map
         const mapDiv = document.createElement('div');
@@ -177,21 +189,17 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
         mapRef.current = window.Celestial;
 
         // Handle window resize
-        const handleResize = () => {
+        resizeHandler = () => {
           if (mapRef.current && mapRef.current.resize) {
             const size = Math.max(window.innerWidth, window.innerHeight);
             mapRef.current.resize({ width: size });
           }
         };
         
-        window.addEventListener('resize', handleResize);
+        window.addEventListener('resize', resizeHandler);
         
         // Initial resize to ensure proper sizing
-        setTimeout(handleResize, 100);
-
-        return () => {
-          window.removeEventListener('resize', handleResize);
-        };
+        setTimeout(resizeHandler, 100);
 
       } catch (error) {
         console.error('Failed to load d3-celestial:', error);
@@ -202,12 +210,25 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
 
     return () => {
       mounted = false;
+      
+      // Clean up resize handler
+      if (resizeHandler) {
+        window.removeEventListener('resize', resizeHandler);
+      }
+      
+      // Clean up celestial map
       if (mapRef.current && mapRef.current.clear) {
         try {
           mapRef.current.clear();
+          mapRef.current = null;
         } catch (e) {
-          // Ignore cleanup errors
+          console.log('Error during cleanup:', e);
         }
+      }
+      
+      // Clear container
+      if (containerRef.current) {
+        containerRef.current.innerHTML = '';
       }
     };
   }, [latitude, longitude]);
