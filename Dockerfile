@@ -35,8 +35,11 @@ RUN chmod +x start.sh
 ENV API_URL=https://www.chancecallahan.com
 ENV DEPLOY_URL=https://www.chancecallahan.com
 
-# Initialize Reflex (this will use the env vars above)
+# Initialize Reflex
 RUN reflex init
+
+# Export the frontend with the correct URLs baked in
+RUN reflex export --frontend-only --no-zip
 
 # Expose port (Railway will use $PORT)
 EXPOSE 8000
