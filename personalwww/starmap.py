@@ -189,19 +189,20 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
     <div
       ref={containerRef}
       style={{
-        width: width,
-        height: height,
+        width: '100vw',
+        height: '100vh',
         position: 'fixed',
         top: 0,
         left: 0,
+        right: 0,
+        bottom: 0,
         zIndex: -1,
         overflow: 'hidden',
         background: 'linear-gradient(to bottom, #000428, #004e92)',
       }}
     />
   );
-}
-"""
+}"""
 
     def get_event_triggers(self) -> dict[str, Any]:
         return {}

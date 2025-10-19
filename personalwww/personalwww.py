@@ -175,7 +175,7 @@ class State(rx.State):
 def index() -> rx.Component:
     # Welcome Page (Index) with star map background
     return rx.box(
-        # Star map background
+        # Star map background - always full screen
         rx.cond(
             State.location_loaded,
             starmap(
@@ -185,13 +185,15 @@ def index() -> rx.Component:
             rx.box(),  # Empty box while loading
         ),
         # Content overlay
-        rx.container(
+        rx.center(
             rx.vstack(
                 rx.heading(
                     "Chance Callahan",
                     size="9",
                     color="white",
                     text_shadow="0 0 10px rgba(0,0,0,0.8)",
+                    text_align="center",
+                    width="100%",
                 ),
                 rx.text(
                     "Amateur Radio Operator, Human Spaceflight "
@@ -201,6 +203,7 @@ def index() -> rx.Component:
                     color="white",
                     text_shadow="0 0 10px rgba(0,0,0,0.8)",
                     text_align="center",
+                    width="100%",
                 ),
                 # Last contact info
                 rx.cond(
@@ -232,12 +235,17 @@ def index() -> rx.Component:
                                     color_scheme="orange",
                                 ),
                                 spacing="2",
+                                wrap="wrap",
+                                justify="center",
                             ),
                             spacing="3",
+                            align="center",
                         ),
                         background="rgba(0,0,0,0.7)",
                         padding="4",
                         border_radius="lg",
+                        width="100%",
+                        max_width="500px",
                     ),
                     rx.box(),  # Empty when not loaded
                 ),
@@ -281,6 +289,7 @@ def index() -> rx.Component:
                                 ),
                             ),
                             spacing="3",
+                            align="center",
                         ),
                         background=rx.cond(
                             State.has_tornado,
@@ -293,17 +302,25 @@ def index() -> rx.Component:
                         ),
                         padding="4",
                         border_radius="lg",
+                        width="100%",
+                        max_width="500px",
                     ),
                     rx.box(),  # Empty when not loaded
                 ),
                 spacing="5",
-                justify="center",
                 align="center",
-                min_height="85vh",
+                width="90%",
+                max_width="600px",
+                padding_x=["4", "4", "0"],  # Responsive padding
             ),
+            width="100%",
+            min_height="100vh",
             position="relative",
             z_index="1",
         ),
+        width="100%",
+        height="100vh",
+        overflow="hidden",
         on_mount=State.fetch_all_data,
     )
 
