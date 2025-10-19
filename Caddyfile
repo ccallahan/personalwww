@@ -1,13 +1,14 @@
-:{$PORT} {
-    # Enable automatic HTTPS
-    encode gzip
+:{$PORT}
 
-    # Reverse proxy to Reflex backend on port 8080
-    reverse_proxy localhost:8080 {
-        # WebSocket support
-        header_up Host {host}
-        header_up X-Real-IP {remote}
-        header_up X-Forwarded-For {remote}
-        header_up X-Forwarded-Proto {scheme}
-    }
+encode gzip
+
+@backend_routes path /_event/* /ping /_upload /_upload/*
+handle @backend_routes {
+	reverse_proxy localhost:8000
+}
+
+root * /srv
+route {
+	try_files {path} {path}/ /404.html
+	file_server
 }
