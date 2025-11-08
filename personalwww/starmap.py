@@ -56,12 +56,19 @@ const loadStyle = (href) => {
 function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh' }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
+  const initializedRef = useRef(false);
 
   useEffect(() => {
     let mounted = true;
     let resizeHandler = null;
 
     const initMap = async () => {
+      // Prevent re-initialization if already initialized with same location
+      if (initializedRef.current && mapRef.current) {
+        console.log('Map already initialized, skipping...');
+        return;
+      }
+
       try {
         // Load d3 v3 (d3-celestial was built for v3)
         if (!window.d3) {
@@ -138,7 +145,7 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
           geopos: [longitude, latitude],
           follow: 'zenith',
           adaptable: true,
-          interactive: true,
+          interactive: false,
           form: false,
           location: false,
           controls: false,
@@ -146,13 +153,11 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
           datapath: 'https://cdn.jsdelivr.net/npm/d3-celestial@0.7.2/data/',
           stars: {
             show: true,
-            limit: 6,
+            limit: 4,  // Reduced from 6 to 4 (much fewer stars)
             colors: true,
             style: { fill: '#ffffff', opacity: 1 },
             designation: false,
-            designationLimit: 2.5,
             propername: false,
-            propernameLimit: 1.5,
             size: 7,
             exponent: -0.28,
             data: 'stars.6.json'
@@ -164,18 +169,16 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
             show: true,
             names: false,
             desig: false,
-            namestyle: { fill: '#cccc99', align: 'center', baseline: 'middle', opacity: 0.8 },
             lines: true,
             linestyle: { stroke: '#cccccc', width: 1, opacity: 0.4 },
             bounds: false,
-            boundstyle: { stroke: '#cccc00', width: 0.5, opacity: 0.8, dash: [2, 4] }
           },
           mw: {
             show: true,
             style: { fill: '#ffffff', opacity: 0.15 }
           },
           lines: {
-            graticule: { show: true, stroke: '#cccccc', width: 0.6, opacity: 0.2 },
+            graticule: { show: false },  // Disable graticule to save memory
             equatorial: { show: false },
             ecliptic: { show: false },
             galactic: { show: false },
@@ -187,6 +190,7 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
 
         window.Celestial.display(config);
         mapRef.current = window.Celestial;
+        initializedRef.current = true;
 
         // Handle window resize
         resizeHandler = () => {
@@ -221,6 +225,7 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
         try {
           mapRef.current.clear();
           mapRef.current = null;
+          initializedRef.current = false;
         } catch (e) {
           console.log('Error during cleanup:', e);
         }
@@ -231,7 +236,7 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
         containerRef.current.innerHTML = '';
       }
     };
-  }, [latitude, longitude]);
+  }, []); // Empty deps - only initialize once
 
   return (
     <div
