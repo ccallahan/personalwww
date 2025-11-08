@@ -101,6 +101,10 @@ class State(rx.State):
                             self.last_contact_band = cells[6].text.strip()
                             self.logbook_loaded = True
                             break
+                    
+                    # Clean up BeautifulSoup to free memory
+                    soup.decompose()
+                    del soup
         except Exception as e:
             print(f"Logbook fetch failed: {e}")
             self.logbook_loaded = False

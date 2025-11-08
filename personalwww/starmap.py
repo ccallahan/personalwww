@@ -133,11 +133,12 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
         mapDiv.style.justifyContent = 'center';
         containerRef.current.appendChild(mapDiv);
 
-        // Calculate size to fill screen
-        const size = Math.max(window.innerWidth, window.innerHeight);
+        // Calculate size - use actual viewport size, not max dimension
+        // This reduces canvas size significantly on mobile
+        const size = Math.min(window.innerWidth * 1.5, window.innerHeight * 1.5);
 
         const config = {
-          width: size, // Use larger dimension to ensure full coverage
+          width: size,  // Smaller canvas size
           projection: 'stereographic',
           transform: 'equatorial',
           center: [0, 0],
@@ -153,12 +154,12 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
           datapath: 'https://cdn.jsdelivr.net/npm/d3-celestial@0.7.2/data/',
           stars: {
             show: true,
-            limit: 4,  // Reduced from 6 to 4 (much fewer stars)
+            limit: 3,  // Further reduced from 4 to 3 (only brightest stars)
             colors: true,
             style: { fill: '#ffffff', opacity: 1 },
             designation: false,
             propername: false,
-            size: 7,
+            size: 8,  // Slightly larger to compensate for fewer stars
             exponent: -0.28,
             data: 'stars.6.json'
           },
@@ -170,15 +171,14 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
             names: false,
             desig: false,
             lines: true,
-            linestyle: { stroke: '#cccccc', width: 1, opacity: 0.4 },
+            linestyle: { stroke: '#cccccc', width: 1.5, opacity: 0.5 },
             bounds: false,
           },
           mw: {
-            show: true,
-            style: { fill: '#ffffff', opacity: 0.15 }
+            show: false,  // Disable Milky Way - uses a lot of memory
           },
           lines: {
-            graticule: { show: false },  // Disable graticule to save memory
+            graticule: { show: false },
             equatorial: { show: false },
             ecliptic: { show: false },
             galactic: { show: false },
@@ -195,7 +195,7 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
         // Handle window resize
         resizeHandler = () => {
           if (mapRef.current && mapRef.current.resize) {
-            const size = Math.max(window.innerWidth, window.innerHeight);
+            const size = Math.min(window.innerWidth * 1.5, window.innerHeight * 1.5);
             mapRef.current.resize({ width: size });
           }
         };
