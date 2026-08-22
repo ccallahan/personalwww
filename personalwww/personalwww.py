@@ -70,53 +70,53 @@ class State(rx.State):
             self.location_loaded = True
 
     async def fetch_logbook(self):
-    """Fetch and parse ham radio logbook for last contact."""
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                "https://hamlog.chancecallahan.com/index.php/"
-                "visitor/master",
-                timeout=10.0,
-            )
-            if response.status_code == 200:
-                soup = BeautifulSoup(response.text, "lxml")
+        """Fetch and parse ham radio logbook for last contact."""
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(
+                    "https://hamlog.chancecallahan.com/index.php/"
+                    "visitor/master",
+                    timeout=10.0,
+                )
+                if response.status_code == 200:
+                    soup = BeautifulSoup(response.text, "lxml")
 
-                # Find the table with logbook entries
-                rows = soup.find_all("tr")
-
-                # Skip header row(s) and get first data row (most recent)
-                for i, row in enumerate(rows):
-                    if i == 0:  # Skip header row
-                        continue
+                    # Find the table body with logbook entries
+                    tbody = soup.find("tbody")
                     
-                    cells = row.find_all("td")
-                    if len(cells) >= 7:  # Valid contact row
-                        try:
-                            raw_date = cells[0].text.strip()
-                            # Only process if date parsing succeeds
-                            formatted_date = format_date(raw_date)
-                            self.last_contact_date = formatted_date
-                            self.last_contact_country = (
-                                cells[1].text.strip()
-                            )
-                            self.last_contact_callsign = (
-                                cells[2].text.strip()
-                            )
-                            self.last_contact_mode = cells[3].text.strip()
-                            self.last_contact_band = cells[6].text.strip()
-                            self.logbook_loaded = True
-                            break
-                        except (IndexError, ValueError):
-                            # Skip malformed rows
-                            continue
-                
-                # Clean up BeautifulSoup to free memory
-                soup.decompose()
-                del soup
-    except Exception as e:
-        print(f"Logbook fetch failed: {e}")
-        self.logbook_loaded = False
-        
+                    if tbody:
+                        rows = tbody.find_all("tr")
+                        
+                        # Get first data row (most recent)
+                        for row in rows:
+                            cells = row.find_all("td")
+                            # Need at least 7 cells: Date, Time, Call, Mode, RST(S), RST(R), Band
+                            if len(cells) >= 7:
+                                try:
+                                    raw_date = cells[0].text.strip()
+                                    # Only process if date parsing succeeds
+                                    formatted_date = format_date(raw_date)
+                                    
+                                    self.last_contact_date = formatted_date
+                                    # Country field no longer exists in new Wavelog
+                                    self.last_contact_country = "N/A"
+                                    self.last_contact_callsign = cells[2].text.strip()
+                                    self.last_contact_mode = cells[3].text.strip()
+                                    self.last_contact_band = cells[6].text.strip()
+                                    self.logbook_loaded = True
+                                    break
+                                except (IndexError, ValueError) as e:
+                                    # Skip malformed rows
+                                    print(f"Error parsing row: {e}")
+                                    continue
+                    
+                    # Clean up BeautifulSoup to free memory
+                    soup.decompose()
+                    del soup
+        except Exception as e:
+            print(f"Logbook fetch failed: {e}")
+            self.logbook_loaded = False
+
     async def fetch_weather(self):
         """Fetch weather for KICT from National Weather Service API."""
         try:
@@ -289,7 +289,7 @@ def index() -> rx.Component:
                     rx.card(
                         rx.vstack(
                             rx.heading(
-                                "Weather at KICT:",
+                                "Weather at KHNZ:",
                                 size="5",
                                 color="white",
                             ),
