@@ -110,7 +110,7 @@ class State(rx.State):
             self.logbook_loaded = False
 
     async def fetch_weather(self):
-        """Fetch weather for KHNZ from National Weather Service API."""
+        """Fetch weather for KICT from National Weather Service API."""
         try:
             async with httpx.AsyncClient() as client:
                 # KHNZ coordinates: 36.3611, -78.4636
@@ -119,7 +119,7 @@ class State(rx.State):
                 
                 # Get grid point data for KHNZ location
                 point_response = await client.get(
-                    "https://api.weather.gov/points/36.3611,-78.4636",
+                    "https://api.weather.gov/points/37.6499,-97.4330",
                     headers=headers,
                     timeout=10.0,
                 )
@@ -169,7 +169,7 @@ class State(rx.State):
                     
                     # Check for active alerts
                     alerts_response = await client.get(
-                        f"https://api.weather.gov/alerts/active?point=36.3611,-78.4636",
+                        f"https://api.weather.gov/alerts/active?point=37.6499,-97.4330",
                         headers=headers,
                         timeout=10.0,
                     )
