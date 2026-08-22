@@ -74,7 +74,7 @@ class State(rx.State):
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.get(
-                    "https://hamlog.chancecallahan.com/index.php/"
+                    "https://hamlog.chancecallahan.com/"
                     "visitor/master",
                     timeout=10.0,
                 )
@@ -281,7 +281,7 @@ def index() -> rx.Component:
                     rx.card(
                         rx.vstack(
                             rx.heading(
-                                "Weather at KHNZ:",
+                                "Weather at KICT:",
                                 size="5",
                                 color="white",
                             ),
