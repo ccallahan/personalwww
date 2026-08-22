@@ -289,7 +289,7 @@ def index() -> rx.Component:
                     rx.card(
                         rx.vstack(
                             rx.heading(
-                                "Weather at KHNZ:",
+                                "Weather at KICT:",
                                 size="5",
                                 color="white",
                             ),
