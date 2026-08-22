@@ -57,40 +57,36 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const initializedRef = useRef(false);
+  const scriptsLoadedRef = useRef(false);
 
   useEffect(() => {
     let mounted = true;
     let resizeHandler = null;
 
     const initMap = async () => {
-      // Prevent re-initialization if already initialized with same location
-      if (initializedRef.current && mapRef.current) {
-        console.log('Map already initialized, skipping...');
-        return;
-      }
-
       try {
-        // Load d3 v3 (d3-celestial was built for v3)
-        if (!window.d3) {
-          await loadScript('https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js');
-          // Give d3 time to initialize
-          await new Promise(resolve => setTimeout(resolve, 500));
-        }
-        
-        // Double check d3 is available
-        if (!window.d3) {
-          console.error('d3 failed to load');
-          return;
-        }
-        
-        console.log('d3 loaded, version:', window.d3.version);
-        
-        // Load d3-celestial if not already loaded
-        if (!window.Celestial) {
-          loadStyle('https://cdn.jsdelivr.net/npm/d3-celestial@0.7.2/celestial.min.css');
-          await loadScript('https://cdn.jsdelivr.net/npm/d3-celestial@0.7.2/celestial.min.js');
-          // Wait for Celestial to be fully initialized
-          await new Promise(resolve => setTimeout(resolve, 500));
+        // Load d3 v3 (d3-celestial was built for v3) - only load once
+        if (!scriptsLoadedRef.current) {
+          if (!window.d3) {
+            await loadScript('https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js');
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+          
+          if (!window.d3) {
+            console.error('d3 failed to load');
+            return;
+          }
+          
+          console.log('d3 loaded, version:', window.d3.version);
+          
+          // Load d3-celestial if not already loaded
+          if (!window.Celestial) {
+            loadStyle('https://cdn.jsdelivr.net/npm/d3-celestial@0.7.2/celestial.min.css');
+            await loadScript('https://cdn.jsdelivr.net/npm/d3-celestial@0.7.2/celestial.min.js');
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+          
+          scriptsLoadedRef.current = true;
         }
 
         if (!mounted || !containerRef.current || !window.Celestial) {
@@ -103,7 +99,7 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
           return;
         }
 
-        console.log('Initializing Celestial map...');
+        console.log('Initializing Celestial map with lat:', latitude, 'lon:', longitude);
 
         // Properly clear any previous instance
         if (mapRef.current && mapRef.current.clear) {
@@ -125,20 +121,18 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
         mapDiv.style.width = '100vw';
         mapDiv.style.height = '100vh';
         mapDiv.style.position = 'absolute';
-        mapDiv.style.top = '50%';
-        mapDiv.style.left = '50%';
-        mapDiv.style.transform = 'translate(-50%, -50%) scale(1.2)';
+        mapDiv.style.top = '0';
+        mapDiv.style.left = '0';
         mapDiv.style.display = 'flex';
         mapDiv.style.alignItems = 'center';
         mapDiv.style.justifyContent = 'center';
         containerRef.current.appendChild(mapDiv);
 
-        // Calculate size - use actual viewport size, not max dimension
-        // This reduces canvas size significantly on mobile
+        // Calculate size
         const size = Math.min(window.innerWidth * 1.5, window.innerHeight * 1.5);
 
         const config = {
-          width: size,  // Smaller canvas size
+          width: size,
           projection: 'stereographic',
           transform: 'equatorial',
           center: [0, 0],
@@ -154,12 +148,12 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
           datapath: 'https://cdn.jsdelivr.net/npm/d3-celestial@0.7.2/data/',
           stars: {
             show: true,
-            limit: 3,  // Further reduced from 4 to 3 (only brightest stars)
+            limit: 3,
             colors: true,
             style: { fill: '#ffffff', opacity: 1 },
             designation: false,
             propername: false,
-            size: 8,  // Slightly larger to compensate for fewer stars
+            size: 8,
             exponent: -0.28,
             data: 'stars.6.json'
           },
@@ -175,7 +169,7 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
             bounds: false,
           },
           mw: {
-            show: false,  // Disable Milky Way - uses a lot of memory
+            show: false,
           },
           lines: {
             graticule: { show: false },
@@ -201,8 +195,6 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
         };
         
         window.addEventListener('resize', resizeHandler);
-        
-        // Initial resize to ensure proper sizing
         setTimeout(resizeHandler, 100);
 
       } catch (error) {
@@ -215,12 +207,10 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
     return () => {
       mounted = false;
       
-      // Clean up resize handler
       if (resizeHandler) {
         window.removeEventListener('resize', resizeHandler);
       }
       
-      // Clean up celestial map
       if (mapRef.current && mapRef.current.clear) {
         try {
           mapRef.current.clear();
@@ -231,12 +221,11 @@ function StarMap({ latitude = 0, longitude = 0, width = '100%', height = '100vh'
         }
       }
       
-      // Clear container
       if (containerRef.current) {
         containerRef.current.innerHTML = '';
       }
     };
-  }, []); // Empty deps - only initialize once
+  }, [latitude, longitude]); // Re-initialize when location changes
 
   return (
     <div
