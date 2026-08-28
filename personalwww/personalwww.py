@@ -74,7 +74,7 @@ class State(rx.State):
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.get(
-                    "https://hamlog.chancecallahan.com/index.php/"
+                    "https://hamlog.chancecallahan.com/"
                     "visitor/master",
                     timeout=10.0,
                 )
